@@ -114,7 +114,9 @@ class Game
   end
 
   def play
+
     @board.draw_board
+    puts "#{@board.empty_positions}"
     loop do
       current_player_marks_square
       @board.draw_board

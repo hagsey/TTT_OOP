@@ -6,7 +6,7 @@ class Board
    (1..9).each {|position| @board[position] = Square.new(' ')}
   end
 
-  def new_board
+  def fresh_board
     @board = {}
     (1..9).each {|position| @board[position] = Square.new(' ')}
     draw_board
@@ -81,13 +81,15 @@ class Square
 end
 
 class Game
-  attr_accessor :coin_flip
-  
+  attr_accessor :coin_flip, :coin_choice, :non_choice
+
   def initialize
     @board = Board.new
     @human = Player.new('Eric', 'X')
     @computer = Player.new('Mac', '0')
     @current_player = @human
+    @coin_choice = coin_choice
+    @non_choice = non_choice
   end
 
   def current_player_chooses_square
@@ -123,24 +125,29 @@ class Game
     puts "I'm flipping a coin to see who goes first, do you want heads or tails?"
   end
 
-  def choose_first_player 
+  def heads_or_tails
     begin
       puts "Hit (1) for heads and (2) for tails"
-      coin_choice = gets.chomp.to_i
+      @coin_choice = gets.chomp.to_i
     end until (1..2).include?(coin_choice)
      system 'clear'
     if coin_choice == 1
       puts "You chose heads."
-      coin_choice = 'heads'
-      non_choice = 'tails'
+      @coin_choice = 'heads'
+      @non_choice = 'tails'
     else
       puts "You chose tails."
-      coin_choice = 'tails'
-      non_choice = 'heads'
+      @coin_choice = 'tails'
+      @non_choice = 'heads'
     end
+  end
+
+  def coin_flip
     sleep 1
+    heads_or_tails
     coin_flip = ['heads', 'tails'].sample
     if coin_choice == coin_flip
+
       puts "The coin shows #{coin_choice}."
       sleep 1
       puts "You go first!"
@@ -170,21 +177,21 @@ class Game
   def play
     welcome_message
     loop do
-      choose_first_player
-      @board.new_board
+      coin_flip
+      @board.fresh_board
       loop do
-      current_player_chooses_square
-      @board.draw_board
-        if current_player_wins?
-          winning_message
-          break
-        elsif @board.all_squares_taken?
-          puts "It's a tie."
-          break
-        else
-          alternate_player
+        current_player_chooses_square
+        @board.draw_board
+          if current_player_wins?
+            winning_message
+            break
+          elsif @board.all_squares_taken?
+            puts "It's a tie."
+            break
+          else
+            alternate_player
+          end
         end
-      end
       break unless play_again?
     end
   end
